@@ -10,10 +10,10 @@
 
 | Nome | RM |
 |------|-----|
-| Lorenzo Hayashi Mangini | — |
-| Victorio Bastelli | — |
-| Vitor Bebiano | — |
-| Milton Cezar | — |
+| Lorenzo Hayashi Mangini | 554901 |
+| Victorio Bastelli | 554723 |
+| Vitor Bebiano | 555026 |
+| Milton Cezar | 555206 |
 
 ---
 
