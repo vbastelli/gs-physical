@@ -1,0 +1,14 @@
+# DefenseShield Orbital Intelligence – Dependências
+# FIAP Global Solution 2026
+
+# Visão computacional base
+opencv-python>=4.9.0
+
+# Análise de pose e landmarks corporais
+mediapipe>=0.10.9
+
+# Detecção de objetos com YOLO (opcional, mas recomendado)
+ultralytics>=8.1.0
+
+# Computação numérica
+numpy>=1.24.0
