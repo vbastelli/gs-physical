@@ -175,8 +175,8 @@ As constantes no topo do `defenseshield.py` permitem ajustar o comportamento sem
 
 ### Passo 1 — Clonar o repositório
 ```bash
-git clone https://github.com/vbastelli/gs-physical.git
-cd gs-physical
+git clone https://github.com/<seu-usuario>/defenseshield-orbital.git
+cd defenseshield-orbital
 ```
 
 ### Passo 2 — Criar ambiente virtual
@@ -222,7 +222,7 @@ Uma janela abrirá mostrando o vídeo da webcam com o HUD sobreposto em tempo re
 ## 📁 Estrutura do Repositório
 
 ```
-gs-physical/
+defenseshield-orbital/
 ├── defenseshield.py     # Script principal — pipeline completo de visão computacional
 ├── requirements.txt     # Dependências com versões mínimas fixadas
 ├── README.md            # Este arquivo
@@ -249,3 +249,88 @@ O projeto não é apenas um sistema de câmera inteligente — ele demonstra um 
 
 Projeto acadêmico desenvolvido para a FIAP – Global Solution 2026.
 Uso restrito a fins educacionais.
+
+---
+
+## 🚨 Problemas Conhecidos e Soluções
+
+### ❌ `AttributeError: module 'mediapipe' has no attribute 'solutions'`
+
+**Causa:** O MediaPipe não é compatível com Python 3.13 ou 3.14.
+
+**Solução:**
+
+1. Verifique sua versão do Python:
+```bash
+python --version
+```
+
+2. Se aparecer `3.13` ou `3.14`, você precisa usar o Python **3.11**. Verifique se ele já está instalado:
+```bash
+py -3.11 --version
+```
+
+3. Se não estiver instalado, baixe em: https://www.python.org/downloads/release/python-3119/
+   - Role até **"Files"** e baixe o **Windows installer (64-bit)**
+   - Durante a instalação, marque **"Add Python to PATH"**
+
+4. Apague o venv antigo e recrie com o Python correto:
+```bash
+deactivate
+rm -rf .venv
+py -3.11 -m venv .venv
+source .venv/Scripts/activate   # Git Bash
+# OU
+.venv\Scripts\activate          # PowerShell
+python -m pip install -r requirements.txt
+python defenseshield.py
+```
+
+---
+
+### ❌ `pip` não é reconhecido como comando
+
+**Causa:** O `pip` não está no PATH do sistema (comum no Windows).
+
+**Solução:** Substitua `pip` por `python -m pip` em todos os comandos:
+```bash
+python -m pip install -r requirements.txt
+```
+
+---
+
+### ❌ `.venv\Scripts\activate` não funciona no Git Bash
+
+**Causa:** O Git Bash usa sintaxe Linux, não Windows.
+
+**Solução:** No Git Bash, use:
+```bash
+source .venv/Scripts/activate
+```
+No PowerShell, use:
+```powershell
+.venv\Scripts\activate
+```
+
+---
+
+### ❌ Câmera não abre / tela preta
+
+**Causa:** O índice da câmera pode ser diferente de `0`.
+
+**Solução:** Edite a constante no início do `defenseshield.py`:
+```python
+CAMERA_INDEX = 1  # tente 1 ou 2 se 0 não funcionar
+```
+
+---
+
+### ❌ FPS muito baixo (abaixo de 5)
+
+**Causa:** Hardware sem GPU dedicada rodando todos os módulos simultaneamente.
+
+**Solução:** Reduza a resolução no início do script:
+```python
+FRAME_WIDTH  = 640
+FRAME_HEIGHT = 480
+```
