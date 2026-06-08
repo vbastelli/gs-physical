@@ -222,7 +222,7 @@ Uma janela abrirá mostrando o vídeo da webcam com o HUD sobreposto em tempo re
 ## 📁 Estrutura do Repositório
 
 ```
-defenseshield-orbital/
+gs-physical/
 ├── defenseshield.py     # Script principal — pipeline completo de visão computacional
 ├── requirements.txt     # Dependências com versões mínimas fixadas
 ├── README.md            # Este arquivo
