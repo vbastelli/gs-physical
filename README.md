@@ -175,8 +175,8 @@ As constantes no topo do `defenseshield.py` permitem ajustar o comportamento sem
 
 ### Passo 1 — Clonar o repositório
 ```bash
-git clone https://github.com/<seu-usuario>/defenseshield-orbital.git
-cd defenseshield-orbital
+git clone https://github.com/vbastelli/gs-physical.git
+cd gs-physical
 ```
 
 ### Passo 2 — Criar ambiente virtual
