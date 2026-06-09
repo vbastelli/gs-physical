@@ -14,21 +14,6 @@ Integrantes:
 
 FIAP – Global Solution 2026 – Indústria Espacial
 
-Correções aplicadas (v2):
-  [FIX-1] Bug de escopo em PoseAnalyzer.analyze(): variáveis nose_y,
-          left_wrist_y, right_wrist_y movidas para dentro do bloco
-          if results.pose_landmarks, evitando NameError quando nenhum
-          landmark é detectado.
-  [FIX-2] Comentário incorreto em POSE_SKIP_FRAMES corrigido
-          ("a cada 2 frames" → "a cada 3 frames").
-  [FIX-3] Loop main() refatorado: os 4 módulos de processamento
-          extraídos para funções auxiliares (process_motion,
-          process_detections, process_pose, render_frame),
-          reduzindo main() para ~40 linhas.
-  [FIX-4] save_log() agora protegido com try/except IOError para
-          evitar exceção não capturada em caso de permissão negada.
-  [FIX-5] MOTION_THRESHOLD documentado com unidade (pixels²) e
-          semântica no comentário inline.
 """
 
 import cv2
@@ -57,7 +42,7 @@ FRAME_HEIGHT        = 720
 CONFIDENCE_THRESH   = 0.45
 MAX_LOG_LINES       = 8
 ALERT_COOLDOWN_SEC  = 3
-MOTION_THRESHOLD    = 2500   # [FIX-5] Área mínima de movimento em pixels² (resolução nativa)
+MOTION_THRESHOLD    = 2500
 LOG_DIR             = "logs"
 YOLO_MODEL          = "yolov8n.pt"
 
@@ -65,7 +50,7 @@ YOLO_MODEL          = "yolov8n.pt"
 # YOLO_SKIP_FRAMES : executa YOLO a cada N frames
 # POSE_SKIP_FRAMES : executa Pose a cada N frames (Pose é computacionalmente pesado)
 YOLO_SKIP_FRAMES    = 4
-POSE_SKIP_FRAMES    = 3   # [FIX-2] Corrigido: Pose roda a cada 3 frames (não 2)
+POSE_SKIP_FRAMES    = 3 
 
 # ── Resoluções de inferência ──────────────────
 # Frames redimensionados antes de passar aos modelos para reduzir custo computacional
@@ -198,9 +183,6 @@ class PoseAnalyzer:
         Processa um frame RGB e retorna (results, estado_detectado).
         Estado pode ser: "NORMAL", "ARMS_UP", "FIGHT_GUARD".
 
-        [FIX-1] Toda a lógica de landmarks está dentro do bloco
-        if results.pose_landmarks, eliminando o NameError que ocorria
-        quando nenhuma pessoa era detectada no frame.
         """
         results = self.pose.process(frame_rgb)
         state   = "NORMAL"
@@ -219,7 +201,6 @@ class PoseAnalyzer:
             shoulder_y = (l_shoulder.y + r_shoulder.y) / 2
             wrist_y    = (l_wrist.y   + r_wrist.y)    / 2
 
-            # [FIX-1] Variáveis definidas DENTRO do if, evitando NameError
             nose_y        = lm[PL.NOSE].y
             left_wrist_y  = lm[PL.LEFT_WRIST].y
             right_wrist_y = lm[PL.RIGHT_WRIST].y
@@ -344,11 +325,7 @@ def init_camera(index: int = CAMERA_INDEX) -> cv2.VideoCapture:
 #  FUNÇÃO: SALVAR LOG
 # ══════════════════════════════════════════════
 def save_log(alert_mgr: AlertManager):
-    """
-    Persiste o log de alertas da sessão em arquivo texto.
-    [FIX-4] Protegido com try/except para evitar crash em caso de
-    permissão negada no diretório de saída.
-    """
+
     try:
         os.makedirs(LOG_DIR, exist_ok=True)
         fname = os.path.join(LOG_DIR, datetime.datetime.now().strftime("session_%Y%m%d_%H%M%S.log"))
@@ -361,11 +338,6 @@ def save_log(alert_mgr: AlertManager):
     except IOError as e:
         print(f"[AVISO] Não foi possível salvar o log: {e}")
 
-
-# ══════════════════════════════════════════════
-#  FUNÇÕES DE PROCESSAMENTO POR MÓDULO
-#  [FIX-3] Extraídas do loop main() para melhor legibilidade
-# ══════════════════════════════════════════════
 
 def process_motion(
     frame_small:      np.ndarray,
@@ -526,10 +498,6 @@ def process_pose(
     return cached_results, cached_state
 
 
-# ══════════════════════════════════════════════
-#  LOOP PRINCIPAL
-#  [FIX-3] Reduzido a ~40 linhas com módulos extraídos
-# ══════════════════════════════════════════════
 def main():
     print("=" * 60)
     print("  DefenseShield Orbital Intelligence  [VERSÃO FINAL]")
