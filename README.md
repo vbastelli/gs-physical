@@ -80,7 +80,7 @@ O **MediaPipe** da Google mapeia 33 pontos do corpo humano (landmarks) — ombro
 
 - **NORMAL** → postura comum, nenhum alerta
 - **ARMS_UP** → pulsos acima dos ombros — possível sinal de emergência ou rendição
-- **DOWN** → quadril muito próximo ao nível dos ombros — pessoa no chão
+- **FIGHT_GUARD** → ambos os pulsos próximos ao rosto — postura defensiva detectada
 
 ### HUD (Heads-Up Display)
 Todos os resultados são renderizados sobre o vídeo em tempo real:
