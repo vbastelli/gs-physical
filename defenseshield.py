@@ -69,8 +69,8 @@ except ImportError:
 #  CONFIGURAÇÕES GLOBAIS
 # ══════════════════════════════════════════════
 CAMERA_INDEX        = 0
-FRAME_WIDTH         = 1280
-FRAME_HEIGHT        = 720
+FRAME_WIDTH  = 1280
+FRAME_HEIGHT = 720
 CONFIDENCE_THRESH   = 0.45
 MAX_LOG_LINES       = 8
 ALERT_COOLDOWN_SEC  = 3
@@ -81,14 +81,14 @@ YOLO_MODEL          = "yolov8n.pt"
 # ── Skip de frames ────────────────────────────
 # YOLO_SKIP_FRAMES  : executa YOLO a cada N frames (era calculado mas não usado!)
 # POSE_SKIP_FRAMES  : executa Pose a cada N frames (novo — Pose é pesado também)
-YOLO_SKIP_FRAMES    = 3
-POSE_SKIP_FRAMES    = 2   # Pose roda a cada 2 frames (novo)
+YOLO_SKIP_FRAMES    = 4
+POSE_SKIP_FRAMES    = 3   # Pose roda a cada 2 frames (novo)
 
 # ── Resoluções de inferência ──────────────────
 YOLO_INFER_WIDTH    = 320
 YOLO_INFER_HEIGHT   = 256
-POSE_INFER_WIDTH    = 320
-POSE_INFER_HEIGHT   = 240
+POSE_INFER_WIDTH  = 256
+POSE_INFER_HEIGHT = 192
 
 import torch
 YOLO_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -98,9 +98,23 @@ YOLO_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 #  CLASSES ALVO
 # ══════════════════════════════════════════════
 ALERT_CLASSES = {
-    0:  ("Pessoa detectada",   (0, 255, 100)),
-    67: ("Dispositivo movel",  (0, 200, 255)),
-    39: ("Objeto suspeito",    (0, 100, 255)),
+    # Pessoas
+    0:  ("Pessoa detectada",        (0, 255, 100)),
+
+    # Eletrônicos
+    63: ("Notebook monitorado",     (255, 180, 0)),
+    64: ("Mouse monitorado",        (255, 140, 0)),
+    66: ("Teclado monitorado",      (255, 220, 0)),
+    67: ("Celular monitorado",      (0, 200, 255)),
+
+    # Objetos comuns
+    39: ("Objeto monitorado",      (0, 100, 255)),
+    73: ("Livro monitorado",        (180, 255, 0)),
+    74: ("Relogio monitorado",      (255, 0, 255)),
+
+    # Itens que costumam chamar atenção
+    41: ("Copo monitorado",         (255, 120, 120)),
+    76: ("Tesoura monitorada",      (0, 255, 255)),
 }
 
 COLOR_ACCENT  = (0,  210, 120)
@@ -187,11 +201,36 @@ class PoseAnalyzer:
             wrist_y    = (l_wrist.y   + r_wrist.y)    / 2
             hip_y      = (l_hip.y     + r_hip.y)      / 2
 
-            if wrist_y < shoulder_y - 0.08:
-                state = "ARMS_UP"
-            elif hip_y > shoulder_y + 0.35:
-                state = "DOWN"
+            nose_y = lm[PL.NOSE].y
 
+            left_wrist_y = lm[PL.LEFT_WRIST].y
+            right_wrist_y = lm[PL.RIGHT_WRIST].y
+
+            guard_left = abs(left_wrist_y - nose_y) < 0.15
+            guard_right = abs(right_wrist_y - nose_y) < 0.15
+
+            # Altura vertical do tronco
+            torso_height = abs(hip_y - shoulder_y)
+            if guard_left and guard_right:
+                state = "FIGHT_GUARD"
+            # Braços levantados
+            nose_y = lm[PL.NOSE].y
+
+        left_wrist_y = lm[PL.LEFT_WRIST].y
+        right_wrist_y = lm[PL.RIGHT_WRIST].y
+
+        guard_left = abs(left_wrist_y - nose_y) < 0.15
+        guard_right = abs(right_wrist_y - nose_y) < 0.15
+
+        if wrist_y < shoulder_y - 0.08:
+            state = "ARMS_UP"
+
+        elif guard_left and guard_right:
+            state = "FIGHT_GUARD"
+
+        else:
+            state = "NORMAL"
+        
         return results, state
 
     def draw(self, frame: np.ndarray, results):
@@ -427,7 +466,7 @@ def main():
 
         motion_area, contours, _ = motion_detector.detect(frame_small_yolo)
 
-        if motion_area > motion_thresh_small * 3:
+        if motion_area > motion_thresh_small * 25:
             motion_lvl = "ALTO"
             alert_mgr.trigger("motion_high", f"Movimento intenso detectado (area={int(motion_area)})")
         elif motion_area > motion_thresh_small:
@@ -532,10 +571,13 @@ def main():
         pose_analyzer.draw(frame, cached_pose_results)
 
         if pose_state == "ARMS_UP":
-            alert_mgr.trigger("pose_arms", "Bracos levantados – possivel sinal de alerta")
-        elif pose_state == "DOWN":
-            alert_mgr.trigger("pose_down", "Pessoa no solo detectada")
-
+            alert_mgr.trigger("pose_arms", "Bracos levantados possivel sinal de alerta")
+        elif pose_state == "FIGHT_GUARD":
+            alert_mgr.trigger(
+                "pose_guard",
+                "Postura defensiva detectada"
+            )
+        
         # ─────────────────────────────────────────
         #  MÓDULO 4: HUD
         # ─────────────────────────────────────────
