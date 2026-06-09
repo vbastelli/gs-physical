@@ -54,7 +54,16 @@ Construir um pipeline de visão computacional robusto, modular e eficiente, capa
 - Registrar eventos com precisão temporal para auditoria posterior
 
 ---
+## 🎥 Demonstração em Vídeo
 
+[![DefenseShield Orbital Intelligence — Demonstração](https://img.shields.io/badge/▶_Assistir_Demonstração-YouTube-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=HUcvFRN3hGI)
+
+O vídeo apresenta:
+- Contextualização da solução e arquitetura do pipeline
+- Demonstração ao vivo dos três módulos em execução simultânea
+- Performance de FPS exibida em tempo real no HUD
+- Robustez do sistema sob variações de iluminação (ambiente com luz baixa)
+- Exibição do log de eventos gerado durante a sessão
 ## 🔍 O que o Programa Faz — Passo a Passo
 
 Ao iniciar, o script abre a webcam e entra em um loop contínuo de captura. Para cada frame capturado, **três módulos de análise rodam em paralelo**:
